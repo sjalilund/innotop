@@ -5610,12 +5610,13 @@ sub display_M {
    my %wanted  = map { $_ => 1 } @visible;
 
    foreach my $cxn ( @cxns ) {
-		 my $linecount=0;
-		 my $sth = do_stmt($cxn, 'GET_CHANNELS');
-		 my ( $channel );
-	     $sth->execute();
-	     $sth->bind_columns( \$channel );
-		 while ( $sth->fetch() ) {
+		my $linecount=0;
+		my $sth = do_stmt($cxn, 'GET_CHANNELS');
+		my ( $channel );
+		next if (!$sth);
+		$sth->execute();
+		$sth->bind_columns( \$channel );
+		while ( $sth->fetch() ) {
 			$linecount=$linecount+1;
 			if ( length $channel < 1 ) {
 				$channel = 'no_channels';
@@ -5630,8 +5631,8 @@ sub display_M {
 			if ( $wanted{slave_io_status} ) {
 				push @slave_io_status, extract_values($set, $set, $pre, 'slave_io_status');
 			}
-		 }
-		 if ( $linecount < 1 ) { 
+		}
+		if ( $linecount < 1 ) { 
 			$channel = 'no_channels';
 			my $chcxn = $channel . '=' . $cxn;
 			get_slave_status($cxn,$channel);
@@ -5643,7 +5644,7 @@ sub display_M {
 			if ( $wanted{slave_io_status} ) {
 				push @slave_io_status, extract_values($set, $set, $pre, 'slave_io_status');
 			}
-		 }
+		}
 	  	my $set  = $config{status_inc}->{val} ? inc(0, $cxn) : $vars{$cxn}->{$clock};
 		my $pre  = $vars{$cxn}->{$clock - 1} || $set;
 		if ( $wanted{master_status} ) {
